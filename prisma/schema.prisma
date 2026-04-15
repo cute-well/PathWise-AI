@@ -1,0 +1,42 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String         @id @default(cuid())
+  email         String         @unique
+  name          String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  learningPlans LearningPlan[]
+}
+
+model LearningPlan {
+  id            String         @id @default(cuid())
+  title         String
+  goal          String
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  userId        String?
+  user          User?          @relation(fields: [userId], references: [id])
+  monthlyBlocks MonthlyBlock[]
+}
+
+model MonthlyBlock {
+  id             String       @id @default(cuid())
+  monthNumber    Int
+  topic          String
+  description    String
+  resources      String       // JSON-serialized array of resource URLs/titles
+  createdAt      DateTime     @default(now())
+  learningPlanId String
+  learningPlan   LearningPlan @relation(fields: [learningPlanId], references: [id], onDelete: Cascade)
+}

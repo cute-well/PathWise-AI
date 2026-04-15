@@ -1,0 +1,61 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String         @id @default(cuid())
+  email         String         @unique
+  name          String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  learningPlans LearningPlan[]
+}
+
+model LearningPlan {
+  id            String         @id @default(cuid())
+  userId        String
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  goal          String
+  title         String
+  description   String?
+  startDate     DateTime       @default(now())
+  endDate       DateTime
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  monthlyBlocks MonthlyBlock[]
+}
+
+model MonthlyBlock {
+  id             String       @id @default(cuid())
+  learningPlanId String
+  learningPlan   LearningPlan @relation(fields: [learningPlanId], references: [id], onDelete: Cascade)
+  month          Int
+  title          String
+  goals          String[]
+  milestones     String[]
+  calendarEventId String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  resources      Resource[]
+}
+
+model Resource {
+  id             String       @id @default(cuid())
+  monthlyBlockId String
+  monthlyBlock   MonthlyBlock @relation(fields: [monthlyBlockId], references: [id], onDelete: Cascade)
+  title          String
+  description    String?
+  url            String
+  type           String       // "video", "article", "course", etc.
+  relevanceScore Float?
+  vectorId       String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
